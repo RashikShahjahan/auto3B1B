@@ -1,225 +1,146 @@
 from manim import *
 import numpy as np
 
+class PendulumSystem(VGroup):
+    def __init__(self, mass_radius: float, string_length: float,
+                 hinge_point: tuple[float, float, float] = ORIGIN,
+                 mass_color: str = WHITE, string_color: str = WHITE):
+        super().__init__()
+        
+        # Create components
+        self.bob = Circle(radius=mass_radius, color=mass_color, fill_opacity=1)
+        self.string = Line(start=hinge_point, end=hinge_point + DOWN * string_length, color=string_color)
+        self.hinge = Circle(radius=0.05, color=string_color).move_to(hinge_point)
+        
+        # Add components to VGroup
+        self.add(self.hinge, self.string, self.bob)
+        self.bob.move_to(self.string.get_end())
+        
+        # Store properties
+        self.string_length = string_length
+        self.hinge_point = hinge_point
+
+class SpringMassSystem(VGroup):
+    def __init__(self, mass_width: float = 0.5, spring_length: float = 2.0,
+                 anchor_point: tuple[float, float, float] = ORIGIN,
+                 mass_color: str = WHITE, spring_color: str = WHITE,
+                 num_coils: int = 10):
+        super().__init__()
+        
+        # Create components
+        self.mass = Square(side_length=mass_width, color=mass_color, fill_opacity=1)
+        self.spring = self._create_spring(spring_length, num_coils, spring_color)
+        self.anchor = Circle(radius=0.05, color=spring_color).move_to(anchor_point)
+        
+        # Add components to VGroup
+        self.add(self.anchor, self.spring, self.mass)
+        
+        # Position components
+        self.mass.move_to(anchor_point + DOWN * spring_length)
+        self.spring.move_to((anchor_point + self.mass.get_center()) / 2)
+        
+        # Store properties
+        self.spring_length = spring_length
+        self.anchor_point = anchor_point
+        self.num_coils = num_coils
+
+    def _create_spring(self, length: float, num_coils: int, color: str) -> VMobject:
+        """Helper method to create a spring visualization.
+        
+        Args:
+            length (float): Length of the spring
+            num_coils (int): Number of coils in the spring
+            color (str): Color of the spring
+            
+        Returns:
+            VMobject: A zigzag line representing a spring
+        """
+        points = []
+        coil_width = 0.2  # Width of each coil
+        num_points = num_coils * 2 + 2
+        
+        for i in range(num_points):
+            y = -length * i / (num_points - 1)
+            x = coil_width * (-1 if i % 2 else 1) if 0 < i < num_points - 1 else 0
+            points.append([x, y, 0])
+        
+        spring = VMobject(color=color)
+        spring.set_points_as_corners(points)
+        return spring
+
 class AnimationClass(Scene):
+    """A class for creating and managing physics-based animations using Manim.
+    
+    This class provides methods to create and animate various physical systems like
+    pendulums and spring-mass systems.
+    """
+
     def __init__(self):
         """Initialize the AnimationClass."""
         super().__init__()
-        
-    def add_circle(self, radius: float, color: str):
-        """Create and return a circle with specified radius and color. And add it to the scene.
+
+
+    def add_pendulum_system(self, mass_radius: float, string_length: float, 
+                            hinge_point: tuple[float, float, float] = ORIGIN,
+                            mass_color: str = WHITE, string_color: str = WHITE):
+        """Add a pendulum system to the scene.
         
         Args:
-            radius (float): The radius of the circle
-            color (str): The color of the circle
+            mass_radius (float): Radius of the pendulum bob
+            string_length (float): Length of the pendulum string
+            hinge_point (tuple[float, float, float]): Position of the pendulum's pivot point
+            mass_color (str): Color of the pendulum bob
+            string_color (str): Color of the pendulum string
             
         Returns:
-            Circle: A Manim Circle object
+            PendulumSystem: The created pendulum system
         """
-        circle = Circle(radius=radius, color=color)
-        self.add(circle)
-        return circle
+        system = PendulumSystem(mass_radius, string_length, hinge_point, mass_color, string_color)
+        self.add(system)
+        return system
 
-    def add_rectangle(self, width: float, height: float, color: str):
-        """Create and return a rectangle with specified dimensions and color. And add it to the scene.
+    def add_spring_mass_system(self, mass_width: float = 0.5, spring_length: float = 2.0,
+                               anchor_point: tuple[float, float, float] = ORIGIN,
+                               mass_color: str = WHITE, spring_color: str = WHITE,
+                               num_coils: int = 10):
+        """Add a spring-mass system to the scene.
         
         Args:
-            width (float): The width of the rectangle
-            height (float): The height of the rectangle
-            color (str): The color of the rectangle
+            mass_width (float): Width of the mass block
+            spring_length (float): Natural length of the spring
+            anchor_point (tuple[float, float, float]): Position of the spring's fixed end
+            mass_color (str): Color of the mass block
+            spring_color (str): Color of the spring
+            num_coils (int): Number of coils in the spring visualization
             
         Returns:
-            Rectangle: A Manim Rectangle object 
+            SpringMassSystem: The created spring-mass system
         """
-        rectangle = Rectangle(width=width, height=height, color=color)
-        self.add(rectangle)
-        return rectangle
+        system = SpringMassSystem(mass_width, spring_length, anchor_point, mass_color, spring_color, num_coils)
+        self.add(system)
+        return system
 
-    def remove_object(self, object: VMobject):
-        """Remove an object from the scene.
-        
-        Args:
-            object (VMobject): The Manim object to remove
-        """
-        self.remove(object)
+    def spring_mass_motion(self, system: SpringMassSystem, amplitude: float, angular_frequency: float,
+                           initial_phase: float = 0, damping: float = 0, duration: float = 3.0):
+        """Animate a spring-mass system with harmonic motion."""
+        self.play(SpringMassMotion(system, amplitude=amplitude, 
+                            angular_frequency=angular_frequency,
+                            initial_phase=initial_phase,
+                            damping=damping,
+                            run_time=duration))
 
-    def add_line(self, start: tuple[float, float, float], end: tuple[float, float, float], color: str):
-        """Create and return a line with specified start point, end point and color. And add it to the scene.
-        
-        Args:
-            start (tuple[float, float, float]): The starting coordinates (x, y, z)
-            end (tuple[float, float, float]): The ending coordinates (x, y, z)
-            color (str): The color of the line
-            
-        Returns:
-            Line: A Manim Line object
-        """
-        line = Line(start=start, end=end, color=color)
-        self.add(line)
-        return line
-
-    def linear_motion(self, 
-                     obj: VMobject,
-                     initial_pos: tuple[float, float, float],
-                     initial_vel: tuple[float, float, float],
-                     acceleration: tuple[float, float, float],
-                     duration: float,
-                     ):
-        """Animate an object with linear motion using kinematics equations.
-        
-        Args:
-            obj (VMobject): The object to animate
-            initial_pos (tuple[float, float, float]): Initial position coordinates (x, y, z)
-            initial_vel (tuple[float, float, float]): Initial velocity components (vx, vy, vz)
-            acceleration (tuple[float, float, float]): Acceleration components (ax, ay, az)
-            duration (float): The duration of the animation
-        """
-        self.play(LinearMotion(obj, initial_pos=initial_pos, initial_vel=initial_vel, 
-                             acceleration=acceleration, run_time=duration))
-
-   
-    def pendulum_motion(self, obj:VMobject, length:float, initial_angle:float, duration:float):
-        """Animate an object in pendulum motion.
-        
-        Args:
-            obj (VMobject): The object to animate
-            length (float): The length of the pendulum
-            initial_angle (float): The starting angle in radians
-            duration (float): The duration of the animation
-        """
-        self.play(PendulumMotion(obj, length=length, initial_angle=initial_angle, run_time=duration))
-    
-    def circular_motion(self, obj:VMobject, radius:float, angular_velocity:float, duration:float):
-        """Animate an object in circular motion.
-        
-        Args:
-            obj (VMobject): The object to animate
-            radius (float): The radius of the circular path
-            angular_velocity (float): The angular velocity in radians per second
-            duration (float): The duration of the animation
-        """
-        self.play(CircularMotion(obj, radius=radius, angular_velocity=angular_velocity, run_time=duration))
-        
-    def align_objects_horizontally(self, obj1: VMobject, obj2: VMobject, spacing: float = 0):
-        """Align two objects horizontally with optional spacing between them.
-        
-        Args:
-            obj1 (VMobject): The first object (reference object)
-            obj2 (VMobject): The second object to align
-            spacing (float): Optional spacing between objects (default: 0)
-        """
-        # Get the right edge of obj1 and set obj2's left edge to that position plus spacing
-        obj2.next_to(obj1, RIGHT, buff=spacing)
-
-    def align_objects_vertically(self, obj1: VMobject, obj2: VMobject, spacing: float = 0):
-        """Align two objects vertically with optional spacing between them.
-        
-        Args:
-            obj1 (VMobject): The first object (reference object)
-            obj2 (VMobject): The second object to align
-            spacing (float): Optional spacing between objects (default: 0)
-        """
-        # Get the bottom edge of obj1 and set obj2's top edge to that position plus spacing
-        obj2.next_to(obj1, DOWN, buff=spacing)
-
-    def center_align_objects(self, obj1: VMobject, obj2: VMobject):
-        """Align the centers of two objects.
-        
-        Args:
-            obj1 (VMobject): The first object (reference object)
-            obj2 (VMobject): The second object to align
-        """
-        obj2.move_to(obj1.get_center())
-
-    def create_group(self, *objects: VMobject) -> VGroup:
-        """Create a group of objects that can be manipulated as a single unit.
-        
-        Args:
-            *objects (VMobject): Variable number of Manim objects to group together
-            
-        Returns:
-            VGroup: A Manim VGroup object containing all the provided objects
-        """
-        group = VGroup(*objects)
-        return group
-
-class LinearMotion(Animation):
-    def __init__(self, 
-                 mobject: VMobject,
-                 initial_pos: tuple[float, float, float],
-                 initial_vel: tuple[float, float, float],
-                 acceleration: tuple[float, float, float],
-                 **kwargs) -> None:
-        """Initialize LinearMotion animation.
-        
-        Args:
-            mobject (VMobject): The object to animate
-            initial_pos (tuple[float, float, float]): Initial position (x, y, z)
-            initial_vel (tuple[float, float, float]): Initial velocity (vx, vy, vz)
-            acceleration (tuple[float, float, float]): Acceleration vector (ax, ay, az)
-            **kwargs: Additional animation parameters
-        """
-        super().__init__(mobject, **kwargs)
-        self.initial_pos = list(initial_pos)
-        self.initial_vel = list(initial_vel)
-        self.acceleration = list(acceleration)
-        
-    def interpolate_mobject(self, alpha: float) -> None:
-        """Update the position of the object at each animation frame.
-        
-        Args:
-            alpha (float): Animation progress from 0 to 1
-        """
-        # Calculate current time based on alpha
-        t = alpha * self.run_time
-        
-        # Calculate current position using kinematic equations
-        pos = [
-            self.initial_pos[0] + self.initial_vel[0]*t + 0.5*self.acceleration[0]*t*t,
-            self.initial_pos[1] + self.initial_vel[1]*t + 0.5*self.acceleration[1]*t*t,
-            0
-        ]
-        
-        self.mobject.move_to(pos)
-
-class CircularMotion(Animation):
-    def __init__(self, 
-                 mobject: VMobject,
-                 radius: float,
-                 angular_velocity: float,
-                 **kwargs) -> None:
-        """Initialize CircularMotion animation.
-        
-        Args:
-            mobject (VMobject): The object to animate
-            radius (float): The radius of the circular path
-            angular_velocity (float): The angular velocity in radians per second
-            **kwargs: Additional animation parameters
-        """
-        super().__init__(mobject, **kwargs)
-        self.radius = radius
-        self.angular_velocity = angular_velocity
-        
-    def interpolate_mobject(self, alpha: float) -> None:
-        """Update the position of the object at each animation frame.
-        
-        Args:
-            alpha (float): Animation progress from 0 to 1
-        """
-        # Calculate current time based on alpha
-        t = alpha * self.run_time
-        
-        # Calculate position using parametric equations of circle
-        x = self.radius * np.cos(self.angular_velocity * t)
-        y = self.radius * np.sin(self.angular_velocity * t)
-        
-        self.mobject.move_to((x, y, 0))
+    def pendulum_motion(self, obj: PendulumSystem, length: float, initial_angle: float, 
+                        hinge_point: tuple[float, float, float] = ORIGIN, duration: float = 1.0):
+        """Animate a pendulum system."""
+        self.play(PendulumMotion(obj, length=length, initial_angle=initial_angle, 
+                            hinge_point=hinge_point, run_time=duration))
 
 class PendulumMotion(Animation):
     def __init__(self, 
-                 mobject: VMobject,
+                 mobject: PendulumSystem,
                  length: float,
                  initial_angle: float,
+                 hinge_point: tuple[float, float, float] = ORIGIN,
                  **kwargs) -> None:
         """Initialize PendulumMotion animation.
         
@@ -227,11 +148,14 @@ class PendulumMotion(Animation):
             mobject (VMobject): The object to animate
             length (float): The length of the pendulum
             initial_angle (float): The starting angle in radians
+            hinge_point (tuple[float, float, float]): The pivot point of the pendulum
             **kwargs: Additional animation parameters
         """
         super().__init__(mobject, **kwargs)
+        self.system = mobject
         self.length = length
         self.initial_angle = initial_angle
+        self.hinge_point = np.array(hinge_point)
         self.g = 9.81  # Acceleration due to gravity
         
         # Pre-calculate angular velocity at each time step for smooth animation
@@ -260,30 +184,52 @@ class PendulumMotion(Animation):
             index = int(alpha * (len(self.times) - 1))
             theta = self.angles[index]
         
-        # Convert polar to cartesian coordinates
-        x = self.length * np.sin(theta)
-        y = -self.length * np.cos(theta)  # Negative because y-axis points down in Manim
+        # Convert polar to cartesian coordinates relative to hinge point
+        x = self.hinge_point[0] + self.length * np.sin(theta)
+        y = self.hinge_point[1] - self.length * np.cos(theta)  # Negative because y-axis points down in Manim
         
-        self.mobject.move_to((x, y, 0))
+        # Update the entire pendulum system
+        self.system.string.put_start_and_end_on(self.hinge_point, [x, y, 0])
+        self.system.bob.move_to([x, y, 0])
 
-    
-
-    
-
-
-    
-
-
-
-
+class SpringMassMotion(Animation):
+    def __init__(self, 
+                 mobject: SpringMassSystem,
+                 amplitude: float,
+                 angular_frequency: float,
+                 initial_phase: float = 0,
+                 damping: float = 0,
+                 **kwargs) -> None:
+        super().__init__(mobject, **kwargs)
+        self.system = mobject
+        self.amplitude = amplitude
+        self.angular_frequency = angular_frequency
+        self.initial_phase = initial_phase
+        self.damping = damping
+        self.original_spring_length = self.system.spring_length
         
-    
-
-    
-    
-
-    
-
+    def interpolate_mobject(self, alpha: float) -> None:
+        t = alpha * self.run_time
+        
+        # Calculate displacement using damped harmonic motion equation
+        displacement = self.amplitude * np.exp(-self.damping * t) * \
+                      np.cos(self.angular_frequency * t + self.initial_phase)
+        
+        # Use system's properties directly
+        anchor_point = self.system.anchor.get_center()
+        
+        # Update mass position
+        new_y = anchor_point[1] - self.original_spring_length - displacement
+        self.system.mass.move_to([anchor_point[0], new_y, 0])
+        
+        # Update spring using system's method
+        new_spring = self.system._create_spring(
+            abs(new_y - anchor_point[1]), 
+            self.system.num_coils, 
+            self.system.spring.get_color()
+        )
+        new_spring.move_to((anchor_point + self.system.mass.get_center()) / 2)
+        self.system.spring.become(new_spring)
 
     
 
