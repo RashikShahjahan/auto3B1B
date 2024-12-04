@@ -9,4 +9,5 @@ export const ScriptOutput = z.object({
   segments: z.array(ScriptSegment).describe("Array of script segments")
 });
 
-
+export type ScriptSegment = z.infer<typeof ScriptSegment>;
+export type ScriptOutput = z.infer<typeof ScriptOutput>;

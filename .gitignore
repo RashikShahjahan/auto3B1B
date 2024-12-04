@@ -1,4 +1,4 @@
 venv
-media
+
 __pycache__
-backend/animation/output/
+temp/

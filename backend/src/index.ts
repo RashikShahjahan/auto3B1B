@@ -1,9 +1,3 @@
-import { generatePhysicsScript,convertTextToSpeech } from './utils/scriptGeneration';
-import { executeAnimationCode } from './utils/codeExecution';
+import { createVideo } from './utils/videoGeneration';
 
-const script = await generatePhysicsScript('spring-mass system');
-console.log(script);
-
-
-
-convertTextToSpeech(script.content ?? '');
+createVideo('spring-mass system');

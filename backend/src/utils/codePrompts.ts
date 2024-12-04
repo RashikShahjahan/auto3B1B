@@ -45,6 +45,19 @@ class AnimationScene(AnimationClass):
             SpringMassSystem: The created spring-mass system
         """
 
+    add_text:
+           """Add text to the scene.
+        
+        Args:
+            text (str): The text to display
+            position (tuple[float, float, float]): Position of the text
+            color (str): Color of the text
+            font_size (float): Size of the text
+            
+        Returns:
+            Text: The created text object
+        """
+
    Animation Methods:
 
    pendulum_motion:
@@ -72,7 +85,7 @@ class AnimationScene(AnimationClass):
 
 ### Important Notes:
 - All methods need to be called with self.method_name()
-- All animations use physics-based calculations for realistic motion
+- Only use the methods provided in the template
 - All position coordinates are in the form (x, y, z) where z is typically 0
 
    
@@ -94,4 +107,17 @@ ${COMMON_TEMPLATE}
 - Review the current code provided by the user
 - Apply the requested modifications
 - **Only output Python code** that implements the requested changes using the AnimationClass methods within the template provided. Any other text should be commented out.
+`.trim();
+
+export const CREATE_ANIMATION_PROMPT: string = String.raw`You are an expert at creating physics animations. Your goal is to help create prompts that will generate Python code using the AnimationClass methods.
+${COMMON_TEMPLATE}
+
+### Instructions:
+Given a description of a desired physics animation, create a detailed prompt that will guide an AI to generate the appropriate Python code. The prompt should:
+1. Clearly specify the physics concepts to be demonstrated
+2. Detail the required visual elements and their properties
+3. Describe the expected motion and behavior
+4. Include any specific parameters or constraints
+
+Your output should be formatted as a complete prompt that can be used with the GUIDE template.
 `.trim();
