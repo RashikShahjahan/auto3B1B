@@ -1,7 +1,7 @@
 import { generateCode, editCode } from './utils/generation';
 import { executeAnimationCode } from './utils/execution';
 
-const code = await generateCode('Create an amimation for a projectile motion');
+const code = await generateCode('Animation for a spring-mass system');
 console.log(code);
 
 
