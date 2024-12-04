@@ -44,16 +44,16 @@ export async function executeAnimationCode(code: string) {
 
   const hash = crypto.randomBytes(8).toString('hex');
   const filename = `generated_${hash}.py`;
-  const filepath = path.join(process.cwd(), 'temp', filename);
+  const filepath = path.join(process.cwd(), 'temp', `attempt_${hash}`, filename);
 
   try {
-    await fs.promises.mkdir(path.join(process.cwd(), 'temp'), { recursive: true });
+    await fs.promises.mkdir(path.join(process.cwd(), 'temp', `attempt_${hash}`), { recursive: true });
     
     await fs.promises.writeFile(filepath, code);
 
     const pythonPath =  path.join(VENV_PATH, 'bin', 'python');
     
-    const { stdout, stderr } = await execAsync(`"${pythonPath}" -m manim -pql ${filename} AnimationName`, {
+    await execAsync(`"${pythonPath}" -m manim -pql ${filename} AnimationName`, {
       timeout: 60000,
       maxBuffer: 10 * 1024 * 1024, // 10MB output limit
       env: {
@@ -65,10 +65,11 @@ export async function executeAnimationCode(code: string) {
         PYTHONUNBUFFERED: '1',
         PYTHONDONTWRITEBYTECODE: '1',
       },
-      cwd: path.join(process.cwd(), 'temp')
+      cwd: path.join(process.cwd(), 'temp', `attempt_${hash}`)
     });
     
-    return { stdout, stderr };
+    return hash;
+
   } finally {
     try {
       await fs.promises.unlink(filepath);

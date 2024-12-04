@@ -135,6 +135,24 @@ class AnimationClass(Scene):
         self.play(PendulumMotion(obj, length=length, initial_angle=initial_angle, 
                             hinge_point=hinge_point, run_time=duration))
 
+    def add_text(self, text: str, position: tuple[float, float, float] = ORIGIN,
+                 color: str = WHITE, font_size: float = 36) -> Text:
+        """Add text to the scene.
+        
+        Args:
+            text (str): The text to display
+            position (tuple[float, float, float]): Position of the text
+            color (str): Color of the text
+            font_size (float): Size of the text
+            
+        Returns:
+            Text: The created text object
+        """
+        text_obj = Text(text, color=color, font_size=font_size)
+        text_obj.move_to(position)
+        self.add(text_obj)
+        return text_obj
+
 class PendulumMotion(Animation):
     def __init__(self, 
                  mobject: PendulumSystem,
