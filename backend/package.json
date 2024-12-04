@@ -7,5 +7,10 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@instructor-ai/instructor": "^1.5.0",
+    "openai": "^4.75.0",
+    "zod": "^3.23.8"
   }
 }
