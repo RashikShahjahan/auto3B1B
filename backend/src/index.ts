@@ -1,9 +1,8 @@
-import { generateCode, editCode } from './utils/generation';
-import { executeAnimationCode } from './utils/execution';
+import { generatePhysicsScript } from './utils/scriptGeneration';
+import { executeAnimationCode } from './utils/codeExecution';
 
-const code = await generateCode('Animation for a spring-mass system');
-console.log(code);
+const script = await generatePhysicsScript('spring-mass system');
+console.log(script);
 
 
-executeAnimationCode(code);
 

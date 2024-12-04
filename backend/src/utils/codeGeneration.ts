@@ -1,5 +1,5 @@
 import { Anthropic } from '@anthropic-ai/sdk';
-import { GUIDE, EDIT_GUIDE } from './prompts';
+import { GUIDE, EDIT_GUIDE } from './codePrompts';
 
 
 const client = new Anthropic({
