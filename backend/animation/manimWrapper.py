@@ -7,7 +7,7 @@ class AnimationClass(Scene):
         super().__init__()
         
     def add_circle(self, radius: float, color: str):
-        """Create and return a circle with specified radius and color.
+        """Create and return a circle with specified radius and color. And add it to the scene.
         
         Args:
             radius (float): The radius of the circle
@@ -17,10 +17,11 @@ class AnimationClass(Scene):
             Circle: A Manim Circle object
         """
         circle = Circle(radius=radius, color=color)
+        self.add(circle)
         return circle
 
     def add_rectangle(self, width: float, height: float, color: str):
-        """Create and return a rectangle with specified dimensions and color.
+        """Create and return a rectangle with specified dimensions and color. And add it to the scene.
         
         Args:
             width (float): The width of the rectangle
@@ -28,9 +29,10 @@ class AnimationClass(Scene):
             color (str): The color of the rectangle
             
         Returns:
-            Rectangle: A Manim Rectangle object
+            Rectangle: A Manim Rectangle object 
         """
         rectangle = Rectangle(width=width, height=height, color=color)
+        self.add(rectangle)
         return rectangle
 
     def remove_object(self, object: VMobject):
@@ -41,28 +43,37 @@ class AnimationClass(Scene):
         """
         self.remove(object)
 
-    def add_line(self, start: tuple[float, float], end: tuple[float, float], color: str):
-        """Create and return a line with specified start point, end point and color.
+    def add_line(self, start: tuple[float, float, float], end: tuple[float, float, float], color: str):
+        """Create and return a line with specified start point, end point and color. And add it to the scene.
         
         Args:
-            start (tuple[float, float]): The starting coordinates (x, y)
-            end (tuple[float, float]): The ending coordinates (x, y)
+            start (tuple[float, float, float]): The starting coordinates (x, y, z)
+            end (tuple[float, float, float]): The ending coordinates (x, y, z)
             color (str): The color of the line
             
         Returns:
             Line: A Manim Line object
         """
         line = Line(start=start, end=end, color=color)
+        self.add(line)
         return line
 
     def linear_motion(self, 
                      obj: VMobject,
-                     initial_pos: tuple[float, float] = (0,0,0),
-                     initial_vel: tuple[float, float] = (0,0,0),
-                     acceleration: tuple[float, float] = (0,-9.81,0),
-                     duration: float = 3,
+                     initial_pos: tuple[float, float, float],
+                     initial_vel: tuple[float, float, float],
+                     acceleration: tuple[float, float, float],
+                     duration: float,
                      ):
-        """Simulates 2D motion of any object with variable acceleration and friction"""
+        """Animate an object with linear motion using kinematics equations.
+        
+        Args:
+            obj (VMobject): The object to animate
+            initial_pos (tuple[float, float, float]): Initial position coordinates (x, y, z)
+            initial_vel (tuple[float, float, float]): Initial velocity components (vx, vy, vz)
+            acceleration (tuple[float, float, float]): Acceleration components (ax, ay, az)
+            duration (float): The duration of the animation
+        """
         self.play(LinearMotion(obj, initial_pos=initial_pos, initial_vel=initial_vel, 
                              acceleration=acceleration, run_time=duration))
 
@@ -89,20 +100,51 @@ class AnimationClass(Scene):
         """
         self.play(CircularMotion(obj, radius=radius, angular_velocity=angular_velocity, run_time=duration))
         
+    def align_objects_horizontally(self, obj1: VMobject, obj2: VMobject, spacing: float = 0):
+        """Align two objects horizontally with optional spacing between them.
+        
+        Args:
+            obj1 (VMobject): The first object (reference object)
+            obj2 (VMobject): The second object to align
+            spacing (float): Optional spacing between objects (default: 0)
+        """
+        # Get the right edge of obj1 and set obj2's left edge to that position plus spacing
+        obj2.next_to(obj1, RIGHT, buff=spacing)
+
+    def align_objects_vertically(self, obj1: VMobject, obj2: VMobject, spacing: float = 0):
+        """Align two objects vertically with optional spacing between them.
+        
+        Args:
+            obj1 (VMobject): The first object (reference object)
+            obj2 (VMobject): The second object to align
+            spacing (float): Optional spacing between objects (default: 0)
+        """
+        # Get the bottom edge of obj1 and set obj2's top edge to that position plus spacing
+        obj2.next_to(obj1, DOWN, buff=spacing)
+
+    def center_align_objects(self, obj1: VMobject, obj2: VMobject):
+        """Align the centers of two objects.
+        
+        Args:
+            obj1 (VMobject): The first object (reference object)
+            obj2 (VMobject): The second object to align
+        """
+        obj2.move_to(obj1.get_center())
+
 class LinearMotion(Animation):
     def __init__(self, 
                  mobject: VMobject,
-                 initial_pos: tuple[float, float] = (0,0,0),
-                 initial_vel: tuple[float, float] = (0,0,0),
-                 acceleration: tuple[float, float] = (0,-9.81,0),
+                 initial_pos: tuple[float, float, float],
+                 initial_vel: tuple[float, float, float],
+                 acceleration: tuple[float, float, float],
                  **kwargs) -> None:
         """Initialize LinearMotion animation.
         
         Args:
             mobject (VMobject): The object to animate
-            initial_pos (tuple[float, float]): Initial position (x, y, z)
-            initial_vel (tuple[float, float]): Initial velocity (vx, vy, vz)
-            acceleration (tuple[float, float]): Acceleration vector (ax, ay, az)
+            initial_pos (tuple[float, float, float]): Initial position (x, y, z)
+            initial_vel (tuple[float, float, float]): Initial velocity (vx, vy, vz)
+            acceleration (tuple[float, float, float]): Acceleration vector (ax, ay, az)
             **kwargs: Additional animation parameters
         """
         super().__init__(mobject, **kwargs)
