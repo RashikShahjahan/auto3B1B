@@ -131,6 +131,18 @@ class AnimationClass(Scene):
         """
         obj2.move_to(obj1.get_center())
 
+    def create_group(self, *objects: VMobject) -> VGroup:
+        """Create a group of objects that can be manipulated as a single unit.
+        
+        Args:
+            *objects (VMobject): Variable number of Manim objects to group together
+            
+        Returns:
+            VGroup: A Manim VGroup object containing all the provided objects
+        """
+        group = VGroup(*objects)
+        return group
+
 class LinearMotion(Animation):
     def __init__(self, 
                  mobject: VMobject,

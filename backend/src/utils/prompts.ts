@@ -90,21 +90,6 @@ class AnimationScene(AnimationClass):
             duration (float): The duration of the animation
         """
 
-    Miscellaneous Methods:
-    play:
-        """Play one or more animations.
-        
-        Args:
-            *animations: One or more Animation objects to play.
-                        Multiple animations will play simultaneously.
-                        
-        Examples:
-            # Play a single animation
-            self.play(animation1)
-            
-            # Play multiple animations simultaneously
-            self.play(animation1, animation2, animationN)
-        """
 
     
 
@@ -131,12 +116,6 @@ class AnimationScene(AnimationClass):
         """Align the centers of two objects.
         
         Args:
-            obj1 (VMobject): The first object (reference object)
-            obj2 (VMobject): The second object to align
-        """
-
-   Animation Classes (For creating custom animations):
-
    LinearMotion:        
    """Initialize LinearMotion animation.
         
@@ -170,7 +149,34 @@ class AnimationScene(AnimationClass):
 
    These base animation classes (LinearMotion, CircularMotion, PendulumMotion) can be used as building blocks 
    to create your own custom animation methods. Each class provides physics-based calculations that can be 
-   extended or combined for complex animations. 
+   extended or combined for complex animations.             obj1 (VMobject): The first object (reference object)
+            obj2 (VMobject): The second object to align
+        """
+
+     Grouping Methods:
+    create_group:
+        """Create a group of objects that can be manipulated as a single unit.
+        
+        Args:
+            *objects (VMobject): Variable number of Manim objects to group together
+            
+        Returns:
+            VGroup: A Manim VGroup object containing all the provided objects
+            
+        Example:
+            # Create objects
+            circle = self.add_circle(radius=1, color="RED")
+            rectangle = self.add_rectangle(width=2, height=1, color="BLUE")
+            # Group them together
+            compound_object = self.create_group(circle, rectangle)
+            
+            # Animate the entire group
+            self.circular_motion(compound_object, radius=2, angular_velocity=2, duration=3)
+        """
+
+   Animation Classes (For creating custom animations):
+
+
 
 ### Important Notes:
 - All classes and methods need to be called with self.method_name() or self.AnimationClassName(...)
@@ -180,6 +186,7 @@ class AnimationScene(AnimationClass):
 - All animations use physics-based calculations for realistic motion
 - All position coordinates are in the form (x, y, z) where z is typically 0
 
+   
 
 \`\`\`
 `.trim();
