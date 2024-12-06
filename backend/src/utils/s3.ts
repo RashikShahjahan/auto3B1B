@@ -1,8 +1,16 @@
 import { CreateBucketCommand, PutObjectCommand, S3Client, HeadBucketCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
-import { readFileSync } from "fs";
 
 
-export const s3Client = new S3Client({});
+if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+  throw new Error('AWS credentials are required');
+}
+
+export const s3Client = new S3Client({
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }
+});
 
 
 export const bucketExists = async (bucketName: string) => {
@@ -47,21 +55,23 @@ export const createFolder = async (bucketName: string, folderName: string) => {
   console.log(`Folder ${folderName} created successfully.\n`);
 };
 
-export const uploadFileToBucket = async ({ bucketName, filepath }: { bucketName: string, filepath: string }) => {
-
-  const fileContent = readFileSync(filepath);    
-  
-  const key = filepath.split('/').pop() || filepath;
-  
+export const uploadBufferToBucket = async ({ 
+  bucketName, 
+  buffer, 
+  key 
+}: { 
+  bucketName: string, 
+  buffer: Buffer, 
+  key: string 
+}) => {
   await s3Client.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Body: fileContent,
-        Key: key,
-      }),
-    );
-    console.log(`${key} uploaded successfully.`);
-  
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Body: buffer,
+      Key: key,
+    }),
+  );
+  console.log(`${key} uploaded successfully.`);
 };
   
   

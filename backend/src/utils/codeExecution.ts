@@ -34,33 +34,38 @@ export function containsMaliciousCode(code: string): boolean {
   } 
 
 
-export async function executeAnimationCode(filepath: string, id: string) {
-  const code = await fs.promises.readFile(filepath, 'utf8');
-  if (containsMaliciousCode(code)) {
-    throw new Error('Potentially malicious code detected');
-  }
+export async function executeAnimationCode(code: string, id: string) {
+    if (containsMaliciousCode(code)) {
+        throw new Error('Potentially malicious code detected');
+    }
 
-  try {
-    const pythonPath =  path.join(VENV_PATH, 'bin', 'python');
-    
-    await execAsync(`"${pythonPath}" -m manim -pql ${filepath} AnimationName`, {
-      timeout: 60000,
-      maxBuffer: 10 * 1024 * 1024, // 10MB output limit
-      env: {
-        PATH: `${path.join(VENV_PATH, 'bin')}:${process.env.PATH}`,
-        FFMPEG_BINARY: '/usr/bin/ffmpeg',
-        PYTHONPATH: path.dirname(VENV_PATH),
-        PYTHONIOENCODING: 'utf-8',
-        PYTHONUTF8: '1',
-        PYTHONUNBUFFERED: '1',
-        PYTHONDONTWRITEBYTECODE: '1',
-      },
-      cwd: path.join(process.cwd(), 'temp')
-    });
-    
-    return path.join(process.cwd(), 'temp', 'media', 'videos', `animation_${id}`, '480p15', `AnimationScene.mp4`);
-  } catch (error) {
-    console.error('Error executing animation code:', error);
-    throw error;
-  }
+    const filepath = path.join(process.cwd(), 'temp', `animation_${id}.py`);
+    await fs.promises.writeFile(filepath, code);
+
+    try {
+        const pythonPath = path.join(VENV_PATH, 'bin', 'python');
+        
+        await execAsync(`"${pythonPath}" -m manim -pql ${filepath} AnimationName`, {
+            timeout: 60000,
+            maxBuffer: 10 * 1024 * 1024, // 10MB output limit
+            env: {
+                PATH: `${path.join(VENV_PATH, 'bin')}:${process.env.PATH}`,
+                FFMPEG_BINARY: '/usr/bin/ffmpeg',
+                PYTHONPATH: path.dirname(VENV_PATH),
+                PYTHONIOENCODING: 'utf-8',
+                PYTHONUTF8: '1',
+                PYTHONUNBUFFERED: '1',
+                PYTHONDONTWRITEBYTECODE: '1',
+            },
+            cwd: path.join(process.cwd(), 'temp')
+        });
+        
+        return path.join(process.cwd(), 'temp', 'media', 'videos', `animation_${id}`, '480p15', 'AnimationScene.mp4');
+    } catch (error) {
+        console.error('Error executing animation code:', error);
+        throw error;
+    } finally {
+        // Clean up the temporary file
+        await fs.promises.unlink(filepath).catch(console.error);
+    }
 }

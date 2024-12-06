@@ -29,7 +29,7 @@ const initializeStorage = async () => {
     console.log('Bucket and folders created successfully');
   } catch (error) {
     console.error('Error creating bucket or folders:', error);
-    throw error; // Re-throw to handle in main flow
+    throw error; 
   }
 };
 
@@ -38,7 +38,7 @@ async function main() {
     await initializeStorage();
     
     const splitterWorker = createWorker('script-generation', splitterProcessor, connection, 8);
-    const animationWorker = createWorker('animation-creation', animationProcessor, connection, 2);
+    const animationWorker = createWorker('animation-creation', animationProcessor, connection, 4);
     const narrationWorker = createWorker('narration-creation', narrationProcessor, connection, 8);
     const concatWorker = createWorker('video-creation', concatProcessor, connection, 4);
 
