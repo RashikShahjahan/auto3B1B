@@ -3,7 +3,7 @@ import { CREATE_ANIMATION_PROMPT } from "../utils/codePrompts";
 
 export const ScriptSegmentPair = z.object({
   narration: z.string().describe("Clear, engaging narration explaining the concept"),
-  animation: z.string().describe(`Description of what should be visualized using the following as a guide: ${CREATE_ANIMATION_PROMPT}. No code, just a description.`)
+  animation: z.string().describe(`Description of what should be visualized using the following as a guide: ${CREATE_ANIMATION_PROMPT}. No code, just a description.`),
 });
 
 export const ScriptOutput = z.object({

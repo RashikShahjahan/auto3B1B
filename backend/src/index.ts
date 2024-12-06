@@ -10,9 +10,9 @@ const connection = {
   port: 6379,
 };
 
-const splitterWorker = createWorker('script-generation', splitterProcessor, connection, 50);
-const animationWorker = createWorker('animation-creation', animationProcessor, connection, 6);
-const narrationWorker = createWorker('narration-creation', narrationProcessor, connection, 50);
+const splitterWorker = createWorker('script-generation', splitterProcessor, connection, 8);
+const animationWorker = createWorker('animation-creation', animationProcessor, connection, 2);
+const narrationWorker = createWorker('narration-creation', narrationProcessor, connection, 8);
 const concatWorker = createWorker('video-creation', concatProcessor, connection, 4);
 
 

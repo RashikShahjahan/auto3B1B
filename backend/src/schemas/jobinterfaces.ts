@@ -12,7 +12,7 @@ export interface ConcatJob extends Job {
     name: string;
     queueName: string;
     data: {
-        audioFiles: string[];
+        narrationFiles: string[];
         animationFiles: string[];
     };
 }
@@ -22,6 +22,7 @@ export interface AnimationJob extends Job {
     queueName: string;
     data: {
         prompt: string;
+        index: number;
     };
 }
 
@@ -30,6 +31,7 @@ export interface NarrationJob extends Job {
     queueName: string;
     data: {
         text: string;
+        index: number;
     };
 }
 
