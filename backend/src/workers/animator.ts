@@ -5,6 +5,6 @@ import {executeAnimationCode} from "../utils/codeExecution";
 export default async function animationProcessor (job: AnimationJob) {
     const codeFilepath = await generateCode(job.data.prompt, job.id ?? '');
     const animationFile = await executeAnimationCode(codeFilepath, job.id ?? '');
-    return animationFile;
+    return {animationFile, id: job.id};
 }
 

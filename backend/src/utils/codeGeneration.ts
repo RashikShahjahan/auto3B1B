@@ -1,5 +1,5 @@
 import { Anthropic } from '@anthropic-ai/sdk';
-import { GUIDE, EDIT_GUIDE } from './codePrompts';
+import { GUIDE } from './codePrompts';
 import fs from 'fs';
 import path from 'path';
 
@@ -30,14 +30,13 @@ async function generateCode(prompt: string, id: string): Promise<string> {
         .join('\n')
         .trim();
 
-        const filename = `generated_code.py`;
-        const filepath = path.join(process.cwd(), 'temp', `animation_${id}`, filename);
-        await fs.promises.mkdir(path.dirname(filepath), { recursive: true });
+        const filename = `animation_${id}.py`;
+        const filepath = path.join(process.cwd(), 'temp', filename);
+        await fs.promises.mkdir(path.dirname(path.join(process.cwd(), 'temp')), { recursive: true });
 
         await fs.promises.writeFile(filepath, cleanedCode);
 
     return filepath;
 }
-
 
 export { generateCode };

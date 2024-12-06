@@ -55,14 +55,12 @@ export async function executeAnimationCode(filepath: string, id: string) {
         PYTHONUNBUFFERED: '1',
         PYTHONDONTWRITEBYTECODE: '1',
       },
-      cwd: path.join(process.cwd(), 'temp', `animation_${id}`)
+      cwd: path.join(process.cwd(), 'temp')
     });
     
-  } finally {
-    try {
-      await fs.promises.unlink(filepath);
-    } catch (error) {
-      console.error('Error cleaning up temporary file:', error);
-    }
+    return path.join(process.cwd(), 'temp', 'media', 'videos', `animation_${id}`, '480p15', `AnimationScene.mp4`);
+  } catch (error) {
+    console.error('Error executing animation code:', error);
+    throw error;
   }
 }
