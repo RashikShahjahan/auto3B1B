@@ -27,19 +27,26 @@ async function addChunksToQueue(chunks: {animation_segments: string[], narration
         name: "create-video",
         queueName: "video-creation",
         children: [
-            ...chunks.animation_segments.map(animation_segment => ({
+            ...chunks.animation_segments.map((animation_segment, index) => ({
                 name: "create-animation",
                 queueName: "animation-creation",
-                data: { prompt: animation_segment },
+                data: { 
+                    prompt: animation_segment,
+                    index  // Add index to identify the pair
+                },
+                opts: { ignoreDependencyOnFailure: true },
             })),
-            ...chunks.narration_segments.map(narration_segment => ({
+            ...chunks.narration_segments.map((narration_segment, index) => ({
                 name: "create-narration",
                 queueName: "narration-creation",
-                data: { text: narration_segment },
-                }))
-            ],
-        }
-    );
+                data: { 
+                    text: narration_segment,
+                    index  // Add index to identify the pair
+                },
+                opts: { ignoreDependencyOnFailure: true },
+            }))
+        ],
+    });
 }
 
 

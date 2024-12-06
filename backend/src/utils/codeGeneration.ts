@@ -10,9 +10,10 @@ const client = new Anthropic({
 
 
 async function generateCode(prompt: string, id: string): Promise<string> {
-    const message = await client.messages.create({
-        model: "claude-3-5-haiku-20241022",
-        max_tokens: 8192,
+    try {
+        const message = await client.messages.create({
+            model: "claude-3-5-sonnet-20241022",
+        max_tokens: 2048,
         messages: [
             { role: "user", content: GUIDE },
             { role: "user", content: `${prompt} Only respond with code as plain text without code block syntax around it` }
@@ -36,7 +37,10 @@ async function generateCode(prompt: string, id: string): Promise<string> {
 
         await fs.promises.writeFile(filepath, cleanedCode);
 
-    return filepath;
+        return filepath;
+    } catch (error) {
+        throw new Error(`Failed to generate code: ${error}`);
+    }
 }
 
 export { generateCode };
