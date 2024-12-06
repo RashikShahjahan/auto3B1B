@@ -1,5 +1,8 @@
 import { Queue } from "bullmq";
 import type { SplitterJob } from "./schemas/jobinterfaces";
+import express from "express";
+
+const app = express();
 const splitterQueue = new Queue<SplitterJob>('script-generation');
 
 async function addJobs() {
@@ -12,3 +15,7 @@ async function addJobs() {
 }
 
 addJobs();
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});

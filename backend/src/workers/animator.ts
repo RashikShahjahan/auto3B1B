@@ -8,7 +8,7 @@ export default async function animationProcessor (job: AnimationJob) {
     return {
         animationFile, 
         id: job.id,
-        data: { index: job.data.index }
+        index: job.data.index
     };
 }
 

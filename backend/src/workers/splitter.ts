@@ -12,6 +12,7 @@ export default async function splitterProcessor (job: SplitterJob) {
     const chunks = await splitToChunks(script);
     console.log(chunks);
     await addChunksToQueue(chunks);
+    
   }
   
 async function splitToChunks(script: string) {
