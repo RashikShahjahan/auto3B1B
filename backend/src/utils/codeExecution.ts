@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -30,30 +29,21 @@ export function containsMaliciousCode(code: string): boolean {
       /\.call\(/,
     ];
 
-
-  
     const normalizedCode = code.replace(/\\\s*\n/g, '');
     return dangerousPatterns.some(pattern => pattern.test(normalizedCode));
   } 
 
 
-export async function executeAnimationCode(code: string) {
+export async function executeAnimationCode(filepath: string, id: string) {
+  const code = await fs.promises.readFile(filepath, 'utf8');
   if (containsMaliciousCode(code)) {
     throw new Error('Potentially malicious code detected');
   }
 
-  const hash = crypto.randomBytes(8).toString('hex');
-  const filename = `generated_${hash}.py`;
-  const filepath = path.join(process.cwd(), 'temp', `attempt_${hash}`, filename);
-
   try {
-    await fs.promises.mkdir(path.join(process.cwd(), 'temp', `attempt_${hash}`), { recursive: true });
-    
-    await fs.promises.writeFile(filepath, code);
-
     const pythonPath =  path.join(VENV_PATH, 'bin', 'python');
     
-    await execAsync(`"${pythonPath}" -m manim -pql ${filename} AnimationName`, {
+    await execAsync(`"${pythonPath}" -m manim -pql ${filepath} AnimationName`, {
       timeout: 60000,
       maxBuffer: 10 * 1024 * 1024, // 10MB output limit
       env: {
@@ -65,11 +55,9 @@ export async function executeAnimationCode(code: string) {
         PYTHONUNBUFFERED: '1',
         PYTHONDONTWRITEBYTECODE: '1',
       },
-      cwd: path.join(process.cwd(), 'temp', `attempt_${hash}`)
+      cwd: path.join(process.cwd(), 'temp', `animation_${id}`)
     });
     
-    return hash;
-
   } finally {
     try {
       await fs.promises.unlink(filepath);
