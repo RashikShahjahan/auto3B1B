@@ -4,9 +4,9 @@ import fs from "fs";
 
 const openai = new OpenAI();
 
-export async function convertTextToSpeech(text: string): Promise<string> {
+export async function convertTextToSpeech(text: string, id: string): Promise<string> {
   const audioDir = path.join(process.cwd(), 'temp', 'audio');
-  const speechFile = path.join(audioDir, 'speech.mp3');
+  const speechFile = path.join(audioDir, `${id}.mp3`);
 
   try {
     await fs.promises.mkdir(audioDir, { recursive: true });

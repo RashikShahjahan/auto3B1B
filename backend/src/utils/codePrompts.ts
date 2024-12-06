@@ -3,6 +3,7 @@ const COMMON_TEMPLATE = String.raw`
 ### Template Setup:
 \`\`\`python
 from manimWrapper import AnimationClass
+import numpy as np
 
 class AnimationScene(AnimationClass):
     def construct(self):
@@ -87,8 +88,7 @@ class AnimationScene(AnimationClass):
 - All methods need to be called with self.method_name()
 - Only use the methods provided in the template
 - All position coordinates are in the form (x, y, z) where z is typically 0
-
-   
+- Valid colors are: "BLACK", "BLUE", "GOLD", "GRAY", "GREEN", "MAROON", "ORANGE", "PINK", "PURPLE", "RED", "TEAL", "WHITE", "YELLOW"
 
 \`\`\`
 `.trim();
