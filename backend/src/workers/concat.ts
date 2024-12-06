@@ -9,7 +9,7 @@ export default async function concatProcessor (job: ConcatJob) {
   const segmentMap = new Map();
   
   Object.values(processedChunks).forEach(chunk => {
-    const index = chunk.data?.index;
+    const index = chunk?.index;
     console.log("Index", index);
     if (index === undefined) {
       throw new Error(`Missing index in chunk data`);
