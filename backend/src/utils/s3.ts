@@ -1,38 +1,67 @@
-import { CreateBucketCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { CreateBucketCommand, PutObjectCommand, S3Client, HeadBucketCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { readFileSync } from "fs";
 
 
-const client = new S3Client({});
+export const s3Client = new S3Client({});
 
+
+export const bucketExists = async (bucketName: string) => {
+  try {
+    await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const folderExists = async (bucketName: string, folderName: string) => {
+  try {
+    await s3Client.send(new HeadObjectCommand({ 
+      Bucket: bucketName, 
+      Key: folderName 
+    }));
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
 
 export const createBucket = async (bucketName: string) => {
-    const command = new CreateBucketCommand({ Bucket: bucketName });
-    await client.send(command);
-    console.log("Bucket created successfully.\n");
+  if (await bucketExists(bucketName)) {
+    console.log("Bucket already exists.\n");
     return bucketName;
-  };
+  }
+  const command = new CreateBucketCommand({ Bucket: bucketName });
+  await s3Client.send(command);
+  console.log("Bucket created successfully.\n");
+  return bucketName;
+};
 
-  export const createFolder = async (bucketName: string, folderName: string) => {
-    const command = new PutObjectCommand({ Bucket: bucketName, Key: folderName });
-    await client.send(command);
-    console.log(`Folder ${folderName} created successfully.\n`);
-  };
-  
-  export const uploadFileToBucket = async ({ bucketName, filepath }: { bucketName: string, filepath: string }) => {
+export const createFolder = async (bucketName: string, folderName: string) => {
+  if (await folderExists(bucketName, folderName)) {
+    console.log(`Folder ${folderName} already exists.\n`);
+    return;
+  }
+  const command = new PutObjectCommand({ Bucket: bucketName, Key: folderName });
+  await s3Client.send(command);
+  console.log(`Folder ${folderName} created successfully.\n`);
+};
 
-    const fileContent = readFileSync(filepath);    
+export const uploadFileToBucket = async ({ bucketName, filepath }: { bucketName: string, filepath: string }) => {
+
+  const fileContent = readFileSync(filepath);    
   
-    const key = filepath.split('/').pop() || filepath;
+  const key = filepath.split('/').pop() || filepath;
   
-    await client.send(
-        new PutObjectCommand({
-          Bucket: bucketName,
-          Body: fileContent,
-          Key: key,
-        }),
-      );
-      console.log(`${key} uploaded successfully.`);
-    
-  };
+  await s3Client.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Body: fileContent,
+        Key: key,
+      }),
+    );
+    console.log(`${key} uploaded successfully.`);
+  
+};
   
   
