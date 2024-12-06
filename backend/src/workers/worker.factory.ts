@@ -3,9 +3,10 @@ import type { ConnectionOptions, Processor } from 'bullmq';
 export function createWorker(
     name: string,
     processor: Processor,
-    connection: ConnectionOptions
+    connection: ConnectionOptions,
+    concurrency: number
   ) {
-    const worker = new Worker(name, processor, {connection});
+    const worker = new Worker(name, processor, {connection, concurrency});
   
     worker.on("completed", (job, err) => {
       console.log(`Completed job on queue ${name}`);
