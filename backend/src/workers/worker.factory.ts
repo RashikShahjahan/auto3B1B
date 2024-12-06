@@ -1,6 +1,7 @@
 import { Worker } from 'bullmq';
 import type { ConnectionOptions, Processor } from 'bullmq';
-import { jobEvents } from '../server';
+import { jobEvents } from '../events';
+
 
 export function createWorker(
     name: string,
