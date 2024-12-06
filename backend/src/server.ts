@@ -2,7 +2,7 @@ import { Queue } from "bullmq";
 import type { SplitterJob } from "./schemas/jobinterfaces";
 import express, { type Request as ExpressRequest, type Response as ExpressResponse } from "express";
 import type { Request, Response } from "express";
-import { jobEvents } from "./events";
+import { jobEvents } from "./utils/events";
 import cors from "cors";
 
 const app = express();

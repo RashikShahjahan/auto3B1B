@@ -31,13 +31,7 @@ async function generateCode(prompt: string, id: string): Promise<string> {
         .join('\n')
         .trim();
 
-        const filename = `animation_${id}.py`;
-        const filepath = path.join(process.cwd(), 'temp', filename);
-        await fs.promises.mkdir(path.dirname(path.join(process.cwd(), 'temp')), { recursive: true });
-
-        await fs.promises.writeFile(filepath, cleanedCode);
-
-        return filepath;
+        return cleanedCode;
     } catch (error) {
         throw new Error(`Failed to generate code: ${error}`);
     }

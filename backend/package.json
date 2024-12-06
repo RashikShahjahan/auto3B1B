@@ -9,6 +9,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.705.0",
     "@instructor-ai/instructor": "^1.5.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",

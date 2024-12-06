@@ -1,19 +1,28 @@
 import type { NarrationJob } from "../schemas/jobinterfaces";
 import {convertTextToSpeech} from "../utils/textToSpeech"
-import path from "path";
-import fs from "fs";
+import {uploadBufferToBucket} from "../utils/s3";
 
 export default async function narrationProcessor (job: NarrationJob) {
-  //save narration text to temp folder
-  const tempDir = path.join(process.cwd(), 'temp');
-  const textFilePath = path.join(tempDir, `${job.id}.txt`);
-  await fs.promises.mkdir(tempDir, { recursive: true });
-  await fs.promises.writeFile(textFilePath, job.data.text);
+
+    
+  const textBuffer = Buffer.from(job.data.text);
+  await uploadBufferToBucket({
+      bucketName: 'auto-3b1b',
+      buffer: textBuffer,
+      key: `narration-scripts/${job.id}.txt`
+    });
+
   const narrationFile = await convertTextToSpeech(job.data.text, job.id ?? '');
+  await uploadBufferToBucket({
+    bucketName: 'auto-3b1b',
+    buffer: Buffer.from(narrationFile),
+    key: `narration-audio/${job.id}.mp3`
+  });
+
 
   return {
     narrationFile, 
-    textFilePath,
+    textFilePath: `${job.id}.txt`,
     id: job.id,
     index: job.data.index 
   };
