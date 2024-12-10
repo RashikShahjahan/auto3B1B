@@ -3,8 +3,8 @@ import type { Request, Response } from "express";
 import cors from "cors";
 import startJob from "./workers/starter";
 import {Queue} from 'bullmq';
-
-const concatQueue = new Queue('video-creation');
+import { prisma } from './utils/db';
+const concatQueue = new Queue('output-videos');
 
 const app = express();
 
@@ -46,13 +46,7 @@ app.get('/jobs', async (req: Request, res: Response) => {
         limit
       }
     };
-    
-    console.log('Sending response:', response);
-    
-    // Add cache control headers
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    res.set('Expires', '0');
-    res.set('Pragma', 'no-cache');
+        
     
     res.json(response);
   } catch (error) {
@@ -65,6 +59,13 @@ app.post('/jobs', async (req: Request, res: Response) => {
   try {
     const { topic } = req.body;
     const job = await startJob(topic);
+    await prisma.job.create({
+      data: {
+        id: job.jobId,
+        status: 'waiting',
+        data: { topic },
+      },
+    });
     res.json({ jobId: job.jobId });
   } catch (error) {
     console.error('Error creating job:', error);
