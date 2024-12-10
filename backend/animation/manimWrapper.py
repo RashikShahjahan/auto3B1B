@@ -2,6 +2,18 @@ from manim import *
 import numpy as np
 
 class PendulumSystem(VGroup):
+    """A visual representation of a pendulum system using Manim.
+    
+    This class creates a pendulum consisting of a bob (mass) attached to a fixed
+    point (hinge) by a massless string.
+    
+    Args:
+        mass_radius (float): Radius of the pendulum bob
+        string_length (float): Length of the pendulum string
+        hinge_point (tuple[float, float, float]): Position of the pendulum's pivot point
+        mass_color (str): Color of the pendulum bob
+        string_color (str): Color of the pendulum string
+    """
     def __init__(self, mass_radius: float, string_length: float,
                  hinge_point: tuple[float, float, float] = ORIGIN,
                  mass_color: str = WHITE, string_color: str = WHITE):
@@ -21,6 +33,19 @@ class PendulumSystem(VGroup):
         self.hinge_point = hinge_point
 
 class SpringMassSystem(VGroup):
+    """A visual representation of a spring-mass system using Manim.
+    
+    This class creates a system consisting of a mass attached to a fixed point
+    by a spring, which can oscillate vertically.
+    
+    Args:
+        mass_width (float): Width of the mass block
+        spring_length (float): Natural length of the spring
+        anchor_point (tuple[float, float, float]): Position of the spring's fixed end
+        mass_color (str): Color of the mass block
+        spring_color (str): Color of the spring
+        num_coils (int): Number of coils in the spring visualization
+    """
     def __init__(self, mass_width: float = 0.5, spring_length: float = 2.0,
                  anchor_point: tuple[float, float, float] = ORIGIN,
                  mass_color: str = WHITE, spring_color: str = WHITE,
@@ -154,27 +179,34 @@ class AnimationClass(Scene):
         return text_obj
 
 class PendulumMotion(Animation):
+    """An animation class for simulating pendulum motion with optional damping.
+    
+    This class handles the physics calculations and animation of a pendulum
+    system, including damped motion if specified.
+    
+    Args:
+        mobject (PendulumSystem): The pendulum system to animate
+        length (float): Length of the pendulum
+        initial_angle (float): Starting angle of the pendulum (in radians)
+        hinge_point (tuple[float, float, float]): Position of the pendulum's pivot point
+        damping (float): Damping coefficient for the motion
+        **kwargs: Additional animation parameters
+    """
     def __init__(self, 
                  mobject: PendulumSystem,
                  length: float,
                  initial_angle: float,
                  hinge_point: tuple[float, float, float] = ORIGIN,
+                 damping: float = 0.0,
                  **kwargs) -> None:
-        """Initialize PendulumMotion animation.
-        
-        Args:
-            mobject (VMobject): The object to animate
-            length (float): The length of the pendulum
-            initial_angle (float): The starting angle in radians
-            hinge_point (tuple[float, float, float]): The pivot point of the pendulum
-            **kwargs: Additional animation parameters
-        """
+        """Initialize PendulumMotion animation with damping."""
         super().__init__(mobject, **kwargs)
         self.system = mobject
         self.length = length
         self.initial_angle = initial_angle
         self.hinge_point = np.array(hinge_point)
         self.g = 9.81  # Acceleration due to gravity
+        self.damping = damping  # Store damping factor
         
         # Pre-calculate angular velocity at each time step for smooth animation
         dt = 0.01
@@ -183,9 +215,9 @@ class PendulumMotion(Animation):
         self.angles[0] = initial_angle
         omega = 0  # Initial angular velocity
         
-        # Solve pendulum motion using numerical integration
+        # Solve pendulum motion using numerical integration with damping
         for i in range(1, len(self.times)):
-            alpha = -(self.g/self.length) * np.sin(self.angles[i-1])
+            alpha = -(self.g/self.length) * np.sin(self.angles[i-1]) - self.damping * omega
             omega += alpha * dt
             self.angles[i] = self.angles[i-1] + omega * dt
         
@@ -211,6 +243,19 @@ class PendulumMotion(Animation):
         self.system.bob.move_to([x, y, 0])
 
 class SpringMassMotion(Animation):
+    """An animation class for simulating spring-mass motion with optional damping.
+    
+    This class handles the physics calculations and animation of a spring-mass
+    system, including damped harmonic motion if specified.
+    
+    Args:
+        mobject (SpringMassSystem): The spring-mass system to animate
+        amplitude (float): Maximum displacement from equilibrium
+        angular_frequency (float): Angular frequency of oscillation
+        initial_phase (float): Initial phase of the oscillation (in radians)
+        damping (float): Damping coefficient for the motion
+        **kwargs: Additional animation parameters
+    """
     def __init__(self, 
                  mobject: SpringMassSystem,
                  amplitude: float,

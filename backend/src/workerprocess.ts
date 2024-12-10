@@ -1,7 +1,6 @@
 import animationProcessor from "./workers/animator";
 import concatProcessor from "./workers/concat";
 import narrationProcessor from "./workers/narrator";
-import splitterProcessor from "./workers/splitter";
 import {createWorker} from "./workers/worker.factory";
 import { createBucket, createFolder} from "./utils/s3";
 
@@ -37,14 +36,12 @@ async function main() {
   try {
     await initializeStorage();
     
-    const splitterWorker = createWorker('script-generation', splitterProcessor, connection, 8);
     const animationWorker = createWorker('animation-creation', animationProcessor, connection, 4);
     const narrationWorker = createWorker('narration-creation', narrationProcessor, connection, 8);
     const concatWorker = createWorker('video-creation', concatProcessor, connection, 4);
 
     process.on("SIGTERM", async () => {
       console.info("SIGTERM signal received: closing queues");
-      await splitterWorker.close();
       await animationWorker.close();
       await narrationWorker.close();
       await concatWorker.close();

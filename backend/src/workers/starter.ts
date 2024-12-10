@@ -1,17 +1,20 @@
 import {generateVideoScript} from "../utils/scriptGeneration"
 import {FlowProducer} from "bullmq"
-import type { SplitterJob} from "../schemas/jobinterfaces";
 import type { ScriptSegmentPair } from "../schemas/schema";
 
-export default async function splitterProcessor (job: SplitterJob) {
-  const script = await generateVideoScript(job.data.topic);
+export default async function startJob(topic: string) {
+  const script = await generateVideoScript(topic);
   if (!script) {
         throw new Error("No script generated");
     }
     console.log("Script generated");
     const chunks = await splitToChunks(script);
     console.log(chunks);
-    await addChunksToQueue(chunks);
+    const flow = await addChunksToQueue(chunks);
+
+    return {
+        jobId: flow.job.id,
+    }
     
   }
   
@@ -24,7 +27,7 @@ async function splitToChunks(script: string) {
   
 async function addChunksToQueue(chunks: {animation_segments: string[], narration_segments: string[]}) {
     const flowProducer = new FlowProducer();
-    return flowProducer.add({
+    const flow = await flowProducer.add({
         name: "create-video",
         queueName: "video-creation",
         children: [
@@ -48,6 +51,8 @@ async function addChunksToQueue(chunks: {animation_segments: string[], narration
             }))
         ],
     });
+
+    return flow; 
 }
 
 
