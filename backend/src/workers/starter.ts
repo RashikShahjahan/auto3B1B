@@ -1,16 +1,15 @@
 import {generateVideoScript} from "../utils/scriptGeneration"
 import {FlowProducer} from "bullmq"
 import type { ScriptSegmentPair } from "../schemas/schema";
+import { prisma } from '../utils/db';
 
 export default async function startJob(topic: string) {
-  const script = await generateVideoScript(topic);
-  if (!script) {
+    const script = await generateVideoScript(topic);
+    if (!script) {
         throw new Error("No script generated");
     }
-    console.log("Script generated");
     const chunks = await splitToChunks(script);
-    console.log(chunks);
-    const flow = await addChunksToQueue(chunks);
+    const flow = await addChunksToQueue(chunks, topic);
 
     return {
         jobId: flow.job.id,
@@ -25,7 +24,7 @@ async function splitToChunks(script: string) {
     return { animation_segments, narration_segments };
 }
   
-async function addChunksToQueue(chunks: {animation_segments: string[], narration_segments: string[]}) {
+async function addChunksToQueue(chunks: {animation_segments: string[], narration_segments: string[]}, topic: string) {
     const flowProducer = new FlowProducer();
     const flow = await flowProducer.add({
         name: "create-video",
@@ -52,7 +51,34 @@ async function addChunksToQueue(chunks: {animation_segments: string[], narration
         ],
     });
 
-    return flow; 
+    // Create the parent job
+    await prisma.job.create({
+        data: {
+            id: flow.job.id,
+            status: 'waiting',
+            data: { topic },
+            type: 'create-video',
+        },
+    });
+
+    // Create jobs for each animation and narration task
+    const childJobs = flow.children?.map(async (child) => {
+        await prisma.job.create({
+            data: {
+                id: child.job.id,
+                status: 'waiting',
+                parentId: flow.job.id,
+                type: child.job.name,
+                data: child.job.data,
+            },
+        });
+    });
+
+    if (childJobs) {
+        await Promise.all(childJobs);
+    }
+
+    return flow;
 }
 
 

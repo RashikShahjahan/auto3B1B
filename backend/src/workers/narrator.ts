@@ -1,7 +1,6 @@
 import type { NarrationJob } from "../schemas/jobinterfaces";
 import {convertTextToSpeech} from "../utils/textToSpeech"
 import {uploadBufferToBucket} from "../utils/s3";
-
 export default async function narrationProcessor (job: NarrationJob) {
 
     

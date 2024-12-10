@@ -145,8 +145,8 @@ class AnimationClass(Scene):
         self.add(system)
         return system
 
-    def spring_mass_motion(self, system: SpringMassSystem, amplitude: float, angular_frequency: float,
-                           initial_phase: float = 0, damping: float = 0, duration: float = 3.0):
+    def spring_mass_motion(self, system: SpringMassSystem, amplitude: float, angular_frequency: float, damping: float = 0.0,
+                           initial_phase: float = 0, duration: float = 3.0):
         """Animate a spring-mass system with harmonic motion."""
         self.play(SpringMassMotion(system, amplitude=amplitude, 
                             angular_frequency=angular_frequency,
@@ -154,11 +154,11 @@ class AnimationClass(Scene):
                             damping=damping,
                             run_time=duration))
 
-    def pendulum_motion(self, obj: PendulumSystem, length: float, initial_angle: float, 
+    def pendulum_motion(self, obj: PendulumSystem, length: float, initial_angle: float, damping: float = 0.0,
                         hinge_point: tuple[float, float, float] = ORIGIN, duration: float = 1.0):
         """Animate a pendulum system."""
         self.play(PendulumMotion(obj, length=length, initial_angle=initial_angle, 
-                            hinge_point=hinge_point, run_time=duration))
+                            damping=damping, hinge_point=hinge_point, run_time=duration))
 
     def add_text(self, text: str, position: tuple[float, float, float] = ORIGIN,
                  color: str = WHITE, font_size: float = 36) -> Text:

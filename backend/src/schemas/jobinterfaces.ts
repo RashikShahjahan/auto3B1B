@@ -1,13 +1,5 @@
 import type { Job } from "bullmq";
 
-export interface SplitterJob extends Job {
-    name: string;
-    queueName: string;
-    data: {
-        topic: string;
-    };
-}
-
 export interface ConcatJob extends Job {
     name: string;
     queueName: string;

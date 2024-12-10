@@ -2,9 +2,7 @@ import express from "express";
 import type { Request, Response } from "express";
 import cors from "cors";
 import startJob from "./workers/starter";
-import {Queue} from 'bullmq';
 import { prisma } from './utils/db';
-const concatQueue = new Queue('output-videos');
 
 const app = express();
 
@@ -25,20 +23,17 @@ app.get('/jobs', async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     
-    const jobs = await concatQueue.getJobs(['completed', 'failed', 'active', 'waiting']);
-    const totalJobs = jobs.length;
-    const paginatedJobs = jobs.slice(skip, skip + limit);
-    
-    const jobsData = await Promise.all(paginatedJobs.map(async job => ({
-      id: job.id,
-      status: await job.getState(),
-      data: job.data,
-      returnvalue: job.returnvalue,
-      failedReason: job.failedReason,
-    })));
+    const [jobs, totalJobs] = await Promise.all([
+      prisma.job.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.job.count(),
+    ]);
     
     const response = {
-      jobs: jobsData,
+      jobs,
       pagination: {
         total: totalJobs,
         pages: Math.ceil(totalJobs / limit),
@@ -46,7 +41,6 @@ app.get('/jobs', async (req: Request, res: Response) => {
         limit
       }
     };
-        
     
     res.json(response);
   } catch (error) {
@@ -59,13 +53,6 @@ app.post('/jobs', async (req: Request, res: Response) => {
   try {
     const { topic } = req.body;
     const job = await startJob(topic);
-    await prisma.job.create({
-      data: {
-        id: job.jobId,
-        status: 'waiting',
-        data: { topic },
-      },
-    });
     res.json({ jobId: job.jobId });
   } catch (error) {
     console.error('Error creating job:', error);

@@ -48,6 +48,8 @@ interface Job {
             </div>
             <div>
               <p><strong>Status:</strong> {job.status}</p>
+            </div>
+            <div>
               {job.failedReason && (
                 <p className="text-red-500"><strong>Error:</strong> {job.failedReason}</p>
               )}
