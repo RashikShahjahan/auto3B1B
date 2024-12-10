@@ -1,11 +1,12 @@
-import { Queue } from "bullmq";
-import type { SplitterJob } from "./schemas/jobinterfaces";
 import express from "express";
 import type { Request, Response } from "express";
 import cors from "cors";
+import startJob from "./workers/starter";
+import {Queue} from 'bullmq';
+
+const concatQueue = new Queue('video-creation');
 
 const app = express();
-const splitterQueue = new Queue<SplitterJob>('script-generation');
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -24,7 +25,7 @@ app.get('/jobs', async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     
-    const jobs = await splitterQueue.getJobs(['completed', 'failed', 'active', 'waiting']);
+    const jobs = await concatQueue.getJobs(['completed', 'failed', 'active', 'waiting']);
     const totalJobs = jobs.length;
     const paginatedJobs = jobs.slice(skip, skip + limit);
     
@@ -63,8 +64,8 @@ app.get('/jobs', async (req: Request, res: Response) => {
 app.post('/jobs', async (req: Request, res: Response) => {
   try {
     const { topic } = req.body;
-    const job = await splitterQueue.add("split", { topic });
-    res.json({ jobId: job.id });
+    const job = await startJob(topic);
+    res.json({ jobId: job.jobId });
   } catch (error) {
     console.error('Error creating job:', error);
     res.status(500).json({ error: 'Failed to create job' });

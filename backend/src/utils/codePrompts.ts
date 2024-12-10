@@ -69,6 +69,7 @@ class AnimationScene(AnimationClass):
             length (float): Length of the pendulum
             initial_angle (float): Initial angle from vertical (radians)
             hinge_point (tuple[float, float, float]): Position of the pendulum's pivot point
+            damping (float): Damping coefficient (0 for undamped)
             duration (float): Duration of the animation in seconds
         """
 
