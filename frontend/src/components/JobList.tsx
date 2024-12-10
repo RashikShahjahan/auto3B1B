@@ -47,10 +47,9 @@ interface Job {
               <p><strong>ID:</strong> {job.id}</p>
             </div>
             <div>
-              <p><strong>Topic:</strong> {job.data.topic}</p>
+              <p><strong>Status:</strong> {job.status}</p>
             </div>
             <div>
-              <p><strong>Status:</strong> {job.status}</p>
               {job.failedReason && (
                 <p className="text-red-500"><strong>Error:</strong> {job.failedReason}</p>
               )}
