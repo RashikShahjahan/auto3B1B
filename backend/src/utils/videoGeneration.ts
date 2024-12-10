@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import { uploadBufferToBucket } from "./s3";
 
-export async function createVideo(segments: { animationFile: string, narrationFile: string }[]): Promise<string> {
+export async function createVideo(segments: { animationFile: string, narrationFile: string }[], jobId: string): Promise<string> {
   try {
     // Check for null segments first
     if (segments.some(segment => !segment || !segment.animationFile || !segment.narrationFile)) {
@@ -11,7 +11,7 @@ export async function createVideo(segments: { animationFile: string, narrationFi
 
     const outputDir = path.join('temp', 'output');
     await fs.promises.mkdir(outputDir, { recursive: true });
-    const outputPath = path.join(outputDir, 'final_video.mp4');
+    const outputPath = path.join(outputDir, `${jobId}.mp4`);
 
     // Prepare FFmpeg command
     const inputs = segments.flatMap(segment => 

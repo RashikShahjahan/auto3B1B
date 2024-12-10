@@ -36,7 +36,7 @@ export default async function concatProcessor (job: ConcatJob) {
       return segment;
     });
   
-  const video = await createVideo(segments);
+  const video = await createVideo(segments, job.id??'');
   return video;
 }
 
