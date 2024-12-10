@@ -64,8 +64,5 @@ export async function executeAnimationCode(code: string, id: string) {
     } catch (error) {
         console.error('Error executing animation code:', error);
         throw error;
-    } finally {
-        // Clean up the temporary file
-        await fs.promises.unlink(filepath).catch(console.error);
-    }
+    } 
 }

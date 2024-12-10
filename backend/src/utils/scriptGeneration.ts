@@ -10,13 +10,14 @@ export async function generateVideoScript(topic: string) {
       model: "gpt-4o",
       messages: [{
         role: "user",
-        content: `Create a structured educational video script about ${topic}. 
-        The script should be a sequence of narration-animation pairs where:
-        - narration: Clear, engaging voice transcript explaining the concept
-        - animation: Description of what should be visualized.
+        content: `Create a narration prompt for an educational video about ${topic}.
+        The prompt should guide the narrator to:
+        - Use clear, engaging language
+        - Explain concepts in a logical sequence
+        - Maintain an educational yet conversational tone
+        - Keep sentences concise and impactful
         
-        Each pair should have the animation directly visualizing its corresponding narration.
-       `
+        Format the output as a series of narration prompts that will later be paired with animations.`
       }],
       response_format: zodResponseFormat(ScriptOutput, "script_output"),
     });
@@ -29,3 +30,14 @@ export async function generateVideoScript(topic: string) {
     throw new Error(`Failed to generate video script: ${error}`);
   }
 } 
+
+export async function generateNarration(prompt: string) {
+    const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{
+            role: "user",
+            content: prompt
+        }],
+    });
+    return response.choices[0].message.content;
+}
